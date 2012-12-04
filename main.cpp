@@ -6,9 +6,16 @@
 #include "download.h"
 #include "readXml.h"
 #include "readFile.h"
+#include "image.h"
 
 int main(int argc, char* argv[])
 {
+
+
+    Image img = getImage("http://cbk0.google.com/cbk?output=tile&panoid=UUIQMV0oHJoFVbx0SxqLeA&zoom=3&x=0&y=0",512,512);
+    img.write("test.jpg");
+    return 0;
+
   if(argc!=2){
     std::cout << "Not enough arguments" << std::endl;
   }
@@ -91,14 +98,28 @@ int main(int argc, char* argv[])
 
       //ImagePainter *imagePainter = new ImagePainter(num,imagePath,512*nbx_,512*nby_,croppedwidth_,croppedheight_,nbx_*nby_);
 
+
+      Image imgOut(512*nbx_,512*nby_);
       for(int x=0;x<nbx_;x++){
           for(int y=0;y<nby_;y++){
               std::stringstream ss, filename;
               ss << "http://cbk0.google.com/cbk?output=tile&panoid="<<pano.pano_id<<"&zoom="<<zoom<<"&x="<<x<<"&y="<<y;
+              std::cout << ss.str() << std::endl;
               filename << pano.pano_id <<"_" <<x<<"_"<<y<<".jpg";
-              downloadFile(ss.str(),filename.str());
+              //downloadFile(ss.str(),filename.str());
+
+              Image img = getImage(ss.str(),512,512);
+              img.write(filename.str());
+              Pose pose(x,y);
+              imgOut.add(img,pose);
           }
       }
+
+      imgOut.crop(0,0,croppedwidth_,croppedheight_);
+
+      std::stringstream ss;
+      ss << "Panorama-" << i << ".jpg";
+      imgOut.write(ss.str());
   }
   return 0;
 }
